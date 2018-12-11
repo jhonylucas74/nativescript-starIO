@@ -61,15 +61,12 @@ export class StarIO extends Observable {
     });
   }
 
-  printReceipt(params) {
+  public printReceipt(params) {
     return new Promise((resolve, reject) => {
-      const { portName}  = params;
-      const portSettings = getPortSettingsOption(portName);
-      sendCommand(portName, portSettings, params, resolve, reject);
+      const portSettings = getPortSettingsOption(params.port);
+      sendCommand(params.port, portSettings, params, resolve, reject);
     })
-}
-
-  
+  }
 
   public portDiscovery(strInterface) {
     return new Promise((resolve, reject) => {
@@ -158,11 +155,11 @@ export class Builder extends Observable {
   }
 
   print (port) {
-    const args = [{
+    const args = {
       paperWidth: this.paperWidth,
       port: port,
       commands: this.commands
-    }];
+    };
 
     const starIOPlugin = new StarIO()
     return starIOPlugin.printReceipt(args);
@@ -171,7 +168,7 @@ export class Builder extends Observable {
 
 
 function getPortDiscovery(interfaceName: string) {
-  let BTPortList = null;
+  let BTPortList  = null;
   let TCPPortList = null;
   let USBPortList = null;
 
@@ -179,20 +176,32 @@ function getPortDiscovery(interfaceName: string) {
   const arrayDiscovery = []
   const arrayPorts = [];
 
-
   if (interfaceName == "Bluetooth" || interfaceName == "All") {
       BTPortList = StarIOPort.searchPrinter("BT:");
-      BTPortList.forEach(portInfo => arrayDiscovery.push(portInfo));
+
+      for (let portInfo of BTPortList) {
+        arrayDiscovery.push(portInfo)
+      }
   }
 
   if (interfaceName == "LAN" || interfaceName == "All") {
       TCPPortList = StarIOPort.searchPrinter("TCP:");
-      TCPPortList.forEach(portInfo => arrayDiscovery.push(portInfo));
+
+      for (let portInfo of TCPPortList) {
+        arrayDiscovery.push(portInfo)
+      }
   }
 
   if (interfaceName == "USB" || interfaceName == "All") {
-      USBPortList = StarIOPort.searchPrinter("USB:", context);
-      USBPortList.forEach(portInfo => arrayDiscovery.push(portInfo))
+      try {
+        USBPortList = StarIOPort.searchPrinter("USB:", application.android.context);
+      } catch(e) {
+        USBPortList = []
+      }
+
+      for (let portInfo of USBPortList) {
+        arrayDiscovery.push(portInfo)
+      }
   }
 
   arrayDiscovery.forEach(discovery => {
