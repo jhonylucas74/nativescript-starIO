@@ -96,11 +96,13 @@ export class StarIO extends Observable {
 }
 
 
-export class Builder {
+export class Builder extends Observable {
   commands = []
   paperWidth: number;
 
   constructor(options) {
+    super();
+    
     if(!options) options = {};
     this.paperWidth = options.width || 384;
   }
